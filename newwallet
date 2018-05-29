@@ -1,0 +1,62 @@
+var bip39 = require('bip39')
+var hdkey = require('ethereumjs-wallet/hdkey')
+var Wallet = require('ethereumjs-wallet');
+var util = require('ethereumjs-util')
+var randomBytes = require('randombytes')
+var db = require('../mongoConfig');
+
+// 生成助记词 英文
+var mnemonic_en = bip39.generateMnemonic();
+console.log(mnemonic_en);
+// 生成助记词 中文
+ var mnemonic_cn = bip39.generateMnemonic(128, randomBytes, bip39.wordlists.chinese_simplified);
+console.log(mnemonic_cn);
+//var mnemonic = "魏 州 积 维 净 扣 孤 熙 液 棱 脸 儿";
+ var mnemonic = "early bless priority express today insect column total sweet obtain angle hungry";
+
+console.log("words: ", mnemonic);
+
+var seed = bip39.mnemonicToSeed(mnemonic)
+console.log("seed",seed);
+var hdWallet = hdkey.fromMasterSeed(seed)
+console.log("hdWallet",hdWallet);
+
+// export keystore.json
+var w = hdWallet.getWallet();
+console.log("w",w);
+
+var keystore = w.toV3("1234567",{c:8192,n:8192});
+console.log("keystore:",keystore);
+var strings = JSON.stringify(keystore);
+//console.log("privateKey1:",hdWallet._privKey.toString('hex'));
+// var key1 = hdWallet.derivePath("m/44'/60'/0'/0/0")
+// console.log("privateKey1:", key1._hdkey._privateKey.toString('hex'))
+//var key1 = hdWallet.derivePath("m/44'/60'/0'/0/0")
+//console.log("key1",key1);
+var newWallet =  Wallet.fromV3(keystore,"1234567");
+// export 明文私钥
+console.log("privateKey0:", newWallet._privKey.toString('hex'))
+var address1=keystore.address;
+
+var datakey=db.voterMessage({
+    timeid:new Date().getTime(),
+    phonenum:12345678,
+    address:address1,
+    keystore:strings,
+    password:123456,
+});datakey.save().then(function(response){
+  console.log(response);
+});
+
+// var address1 = util.pubToAddress(key1._hdkey._publicKey, true)
+// address1 = util.toChecksumAddress(address1.toString('hex'))
+// console.log(address1);
+
+
+// var Web3 = require('web3');
+// var web3 = new Web3();
+//
+// web3.setProvider(new web3.providers.HttpProvider('https://rpc.etherzero.org:443'));
+//
+// var balance = web3.eth.getBalance("0xef4b8381f12ad29230d68ce65576acd633d6959b");
+// console.log(balance);
