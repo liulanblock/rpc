@@ -1,0 +1,68 @@
+var Web3 = require('web3');
+var web3 = new Web3(new Web3.providers.WebsocketProvider("ws://0.0.0.0:7545"));
+
+//转账 ================================================
+// web3.eth.accounts.signTransaction({
+//     to: '0xfA7F70ade18F901f1E7a12E984D988b2D669E51f',
+//     value: '1000000000000000000',
+//     gas: 2000000
+// }, '0x5b26a5f51a3eff41668da25432b68e3e77503bc1782f442c5042efc781582369')
+// .then(function(result){
+//   console.log(result)
+//   web3.eth.sendSignedTransaction(result.rawTransaction,function(errs,results){
+//       console.log("errs:",errs);
+//       console.log("result:",results)
+//     });
+// });
+
+//调用合约常量================================================
+// var mycontract = new web3.eth.Contract(abi1(),"0x2c7510740a69faf13b813c02403c11c6f47d0db2");
+//
+// mycontract.methods.balanceOf("0xfA7F70ade18F901f1E7a12E984D988b2D669E51f").call().then(function(result){
+//     console.log(result)
+// });
+
+// 调用合约方法================================================
+var mycontract = new web3.eth.Contract(abi1(),"0x2c7510740a69faf13b813c02403c11c6f47d0db2");
+
+ var data =mycontract.methods['transfer(address,uint256)']('0xfA7F70ade18F901f1E7a12E984D988b2D669E51f',10000).encodeABI();
+ console.log(data)
+ web3.eth.accounts.signTransaction({
+   to: '0x2c7510740a69faf13b813c02403c11c6f47d0db2',
+   data: data,
+   gas: 1500000,
+ },'0x5b26a5f51a3eff41668da25432b68e3e77503bc1782f442c5042efc781582369',function(err,result){
+   console.log("rawTransaction:"+result.rawTransaction)
+  web3.eth.sendSignedTransaction(result.rawTransaction,function(errs,results){
+    console.log("errs:",errs);
+    console.log("result:",results)
+  });
+});
+
+// 监听合约事件
+var mycontract = new web3.eth.Contract(abi1(),"0x2c7510740a69faf13b813c02403c11c6f47d0db2");
+console.log("abc")
+mycontract.events["Transfer"]({},(err,results)=>{
+  // console.log(err)
+  console.log("000:",results.returnValues[0]);
+  console.log("from:",results.returnValues.from);
+});
+
+// subcribeToEvent = (event: string, option: any, callback: Function=console.log) => {
+//     return BOP_Contract.events[event](option, callback)
+//   }
+//
+//   onceEventHappen = (event: string, options: any, callback: Function=console.log) => {
+//     return BOP_Contract.once(event, options, callback)
+//   }
+//
+//   getHistoryEvents = (event: string, options: any, callback: Function=console.log) => {
+//     return BOP_Contract.getPastEvents(event, options, callback)
+//   }
+//mycontract.once("Transfer", {}, console.log);
+//mycontract.getPastEvents("Transfer", {},  console.log)
+
+
+function abi1(){
+  return [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"totalSupply","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"endICO","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"startICO","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"drain","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":true,"stateMutability":"payable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"counter","type":"uint256"},{"indexed":false,"name":"investors","type":"address"},{"indexed":false,"name":"weiReceived","type":"uint256"},{"indexed":false,"name":"bopsent","type":"uint256"}],"name":"preico","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"counter","type":"uint256"},{"indexed":false,"name":"investors","type":"address"},{"indexed":false,"name":"weiReceived","type":"uint256"},{"indexed":false,"name":"bopsent","type":"uint256"}],"name":"ico","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}];
+}
